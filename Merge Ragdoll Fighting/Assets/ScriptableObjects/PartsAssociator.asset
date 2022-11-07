@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ad808df7ac7f444b988c3403ba5083d, type: 3}
+  m_Name: PartsAssociator
+  m_EditorClassIdentifier: 
+  _assotioations:
+  - _menuPrefab: {fileID: 668737075087083103, guid: 221f127b5e40fc947b6f47120de2f499, type: 3}
+    _fightingPrefab: {fileID: 668737075087083103, guid: a94d6dc83e8148242b5b098a57b20b60, type: 3}
+  - _menuPrefab: {fileID: 3052836395551178997, guid: 7ebcbd58b11eadf4bbbcd6374a1494f1, type: 3}
+    _fightingPrefab: {fileID: 3052836395551178997, guid: 5d104c5985faad54e9493c9f70fb47d9, type: 3}
+  - _menuPrefab: {fileID: 1904516107534309969, guid: a6100875a0fe7624db946a268255681c, type: 3}
+    _fightingPrefab: {fileID: 1904516107534309969, guid: 4c65ae85e6dbc084988f644a2d2a3f71, type: 3}
+  - _menuPrefab: {fileID: 6764130940606772602, guid: 35c379c9f1f20c94887ac62675bc7123, type: 3}
+    _fightingPrefab: {fileID: 6764130940606772602, guid: 2231cf2ba80af454b87117335e773600, type: 3}
