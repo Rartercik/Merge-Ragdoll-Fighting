@@ -31,12 +31,14 @@ namespace Game.BodyComponents.Fighting
         private bool _startedAttacking;
         private bool _attacking;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _transform = transform;
             _shotSoundSource = GetComponent<RandomPitchSource>();
         }
+#endif
 
         [Inject]
         public void Construct(Decorator<DiContainer> containerDecorator, PuppetMaster body, Animator hitAnimator, AnimationClip hitAnimation)

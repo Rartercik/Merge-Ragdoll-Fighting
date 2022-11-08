@@ -20,11 +20,13 @@ namespace Game.BodyComponents.Fighting
 
         private bool _canAttack = true;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _hitSoundSource = GetComponent<RandomPitchSource>();
         }
+#endif
 
         [Inject]
         private void Construct(Vector3 hitDimensions, Animator hitAnimator, AnimationClip hitAnimation, LayerMask enemy)

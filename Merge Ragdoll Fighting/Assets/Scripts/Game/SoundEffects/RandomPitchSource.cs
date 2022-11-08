@@ -15,11 +15,13 @@ namespace Game.SoundEffects
         [Space(5)]
         [SerializeField] private AudioSource _source;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _source = GetComponent<AudioSource>();
         }
+#endif
 
         public void PlayOneShot()
         {

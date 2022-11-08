@@ -1,4 +1,4 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
 
 using System;
 using System.Collections.Generic;
@@ -16,11 +16,7 @@ namespace Animancer
     /// <inheritdoc/>
     /// https://kybernetik.com.au/animancer/api/Animancer/ManualMixerTransition
     [Serializable]
-#if !UNITY_EDITOR
-    [System.Obsolete(Validate.ProOnlyMessage)]
-#endif
-    public class ManualMixerTransition : ManualMixerTransition<ManualMixerState>,
-        ManualMixerState.ITransition, ICopyable<ManualMixerTransition>
+    public class ManualMixerTransition : ManualMixerTransition<ManualMixerState>, ManualMixerState.ITransition
     {
         /************************************************************************************************************************/
 
@@ -30,14 +26,6 @@ namespace Animancer
             State = new ManualMixerState();
             InitializeState();
             return State;
-        }
-
-        /************************************************************************************************************************/
-
-        /// <inheritdoc/>
-        public virtual void CopyFrom(ManualMixerTransition copyFrom)
-        {
-            CopyFrom((ManualMixerTransition<ManualMixerState>)copyFrom);
         }
 
         /************************************************************************************************************************/
@@ -66,8 +54,6 @@ namespace Animancer
             private readonly Dictionary<string, ReorderableList>
                 PropertyPathToStates = new Dictionary<string, ReorderableList>();
 
-            private ReorderableList _MultiSelectDummyList;
-
             /************************************************************************************************************************/
 
             /// <summary>Gather the details of the `property`.</summary>
@@ -80,25 +66,6 @@ namespace Animancer
             {
                 InitializeMode(property);
                 GatherSubProperties(property);
-
-                if (property.hasMultipleDifferentValues)
-                {
-                    if (_MultiSelectDummyList == null)
-                    {
-                        _MultiSelectDummyList = new ReorderableList(new List<Object>(), typeof(Object))
-                        {
-                            elementHeight = AnimancerGUI.LineHeight,
-                            displayAdd = false,
-                            displayRemove = false,
-                            footerHeight = 0,
-                            drawHeaderCallback = DoAnimationHeaderGUI,
-                            drawNoneElementCallback = area => EditorGUI.LabelField(area,
-                                "Multi-editing animations is not supported"),
-                        };
-                    }
-
-                    return _MultiSelectDummyList;
-                }
 
                 if (CurrentAnimations == null)
                     return null;
@@ -139,8 +106,7 @@ namespace Animancer
                 CurrentSpeeds = property.FindPropertyRelative(SpeedsField);
                 CurrentSynchronizeChildren = property.FindPropertyRelative(SynchronizeChildrenField);
 
-                if (!property.hasMultipleDifferentValues &&
-                    CurrentAnimations != null &&
+                if (CurrentAnimations != null &&
                     CurrentSpeeds != null &&
                     CurrentSpeeds.arraySize != 0)
                     CurrentSpeeds.arraySize = CurrentAnimations.arraySize;
@@ -187,16 +153,12 @@ namespace Animancer
                 {
                     var states = GatherDetails(property);
                     if (states != null)
-                        height += AnimancerGUI.StandardSpacing + states.GetHeight();
-
-                    if (CurrentAnimations != null)
+                    {
                         height -= AnimancerGUI.StandardSpacing + EditorGUI.GetPropertyHeight(CurrentAnimations, label);
-
-                    if (CurrentSpeeds != null)
                         height -= AnimancerGUI.StandardSpacing + EditorGUI.GetPropertyHeight(CurrentSpeeds, label);
-
-                    if (CurrentSynchronizeChildren != null)
                         height -= AnimancerGUI.StandardSpacing + EditorGUI.GetPropertyHeight(CurrentSynchronizeChildren, label);
+                        height += AnimancerGUI.StandardSpacing + states.GetHeight();
+                    }
                 }
 
                 return height;
@@ -224,8 +186,6 @@ namespace Animancer
                         return;
 
                     _CurrentChildList = GatherDetails(_RootProperty);
-                    if (_CurrentChildList == null)
-                        return;
 
                     var indentLevel = EditorGUI.indentLevel;
 
@@ -830,10 +790,6 @@ namespace Animancer
             /// </summary>
             public static void TryCollapseArrays()
             {
-                if (CurrentProperty == null ||
-                    CurrentProperty.hasMultipleDifferentValues)
-                    return;
-
                 TryCollapseSpeeds();
                 TryCollapseSync();
             }
@@ -846,9 +802,6 @@ namespace Animancer
             public static void TryCollapseSpeeds()
             {
                 var property = CurrentSpeeds;
-                if (property == null)
-                    return;
-
                 var speedCount = property.arraySize;
                 if (speedCount <= 0)
                     return;
@@ -870,9 +823,6 @@ namespace Animancer
             public static void TryCollapseSync()
             {
                 var property = CurrentSynchronizeChildren;
-                if (property == null)
-                    return;
-
                 var count = property.arraySize;
                 var changed = false;
 

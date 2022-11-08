@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using RootMotion.Dynamics;
+using Animancer;
 using Zenject;
 using Game.Utilities;
 

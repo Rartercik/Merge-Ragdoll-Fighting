@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using Game.MenuComponents;
 
 namespace Game.Economics
 {
@@ -28,7 +27,7 @@ namespace Game.Economics
             if (_initialized == false)
             {
 #if UNITY_ANDROID && !UNITY_EDITOR
-            _playerPossesionsPath = Path.Combine(Application.persistentDataPath, _possesionsFile);
+                _possesionsPath = Path.Combine(Application.persistentDataPath, _possesionsFile);
 #else
                 _possesionsPath = Path.Combine(Application.dataPath, _possesionsFile);
 #endif

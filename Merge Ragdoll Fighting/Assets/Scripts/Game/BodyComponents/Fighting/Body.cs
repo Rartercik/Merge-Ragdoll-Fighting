@@ -12,12 +12,14 @@ namespace Game.BodyComponents.Fighting
         [SerializeField] private BodyMovement _movement;
         [SerializeField] private BodyInteraction _interaction;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _movement = GetComponent<BodyMovement>();
             _interaction = GetComponent<BodyInteraction>();
         }
+#endif
 
         public void SetMovementSpeed(float coefficient)
         {

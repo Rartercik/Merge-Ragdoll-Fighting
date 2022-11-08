@@ -17,12 +17,14 @@ namespace Game.BodyComponents.Fighting
 
         private Transform _enemyTransform;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _transform = transform;
             _rigidbody = GetComponent<Rigidbody>();
         }
+#endif
 
         [Inject]
         private void Construct(Transform enemy, Vector3 hitDimensions, LayerMask enemyLayer)

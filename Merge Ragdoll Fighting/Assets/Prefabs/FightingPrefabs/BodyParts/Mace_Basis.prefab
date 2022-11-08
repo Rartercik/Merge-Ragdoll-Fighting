@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b03cf7e05f908b4eba9ee708e942318, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _shot: {fileID: 8300000, guid: 7e7fbe528270c57408bf7d08ddb9c280, type: 3}
+  _shot: {fileID: 8300000, guid: 0b9fb3dad3aaafd4db8d4e38b5d4b550, type: 3}
   _minPitch: 0.3
   _maxPitch: 1.2
   _source: {fileID: 7063662379758110220}

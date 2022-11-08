@@ -27,11 +27,13 @@ namespace Game.Environment
             _centerStartPosition = GetCenter(_player.position, _enemy.position);
         }
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _transform = transform;
         }
+#endif
 
         private void LateUpdate()
         {

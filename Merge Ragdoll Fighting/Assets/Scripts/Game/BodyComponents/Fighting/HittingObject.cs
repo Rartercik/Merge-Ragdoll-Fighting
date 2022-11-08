@@ -15,11 +15,13 @@ namespace Game.BodyComponents.Fighting
         [Space(5)]
         [SerializeField] private Collider _collider;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _collider = GetComponent<Collider>();
         }
+#endif
 
         protected abstract Vector3 HitDimensions { get; set; }
         protected abstract LayerMask Enemy { get; set; }

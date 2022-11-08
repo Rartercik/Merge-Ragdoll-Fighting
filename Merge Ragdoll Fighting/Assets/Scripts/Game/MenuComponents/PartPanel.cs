@@ -24,12 +24,14 @@ namespace Game.MenuComponents
 
         private bool _blocked = true;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _image = GetComponent<Image>();
             _changeSoundSource = GetComponent<RandomPitchSource>();
         }
+#endif
 
         public int Indificator => _indificator;
 

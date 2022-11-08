@@ -15,11 +15,13 @@ namespace Game.BodyComponents.Fighting
 
         public Rigidbody Rigidbody => _rigidbody;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _rigidbody = GetComponent<Rigidbody>();
         }
+#endif
 
         public void ApplyDamage(int damage)
         {

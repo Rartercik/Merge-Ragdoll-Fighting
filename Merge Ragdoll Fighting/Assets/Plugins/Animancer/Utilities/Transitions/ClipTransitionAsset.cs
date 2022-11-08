@@ -1,4 +1,4 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
 
 using Animancer.Units;
 using System;
@@ -16,8 +16,8 @@ namespace Animancer
     {
         /// <inheritdoc/>
         [Serializable]
-        public new class UnShared :
-            UnShared<ClipTransitionAsset, ClipTransition, ClipState>,
+        public class UnShared :
+            AnimancerTransitionAsset.UnShared<ClipTransitionAsset, ClipTransition, ClipState>,
             ClipState.ITransition
         { }
     }
@@ -25,8 +25,7 @@ namespace Animancer
     /// <inheritdoc/>
     /// https://kybernetik.com.au/animancer/api/Animancer/ClipTransition
     [Serializable]
-    public class ClipTransition : AnimancerTransition<ClipState>,
-        ClipState.ITransition, IMotion, IAnimationClipCollection, ICopyable<ClipTransition>
+    public class ClipTransition : AnimancerTransition<ClipState>, ClipState.ITransition, IMotion, IAnimationClipCollection
     {
         /************************************************************************************************************************/
 
@@ -74,8 +73,8 @@ namespace Animancer
         [SerializeField]
         [Tooltip(Strings.Tooltips.NormalizedStartTime)]
         [AnimationTime(AnimationTimeAttribute.Units.Normalized)]
-        [DefaultValue(float.NaN, 0f)]
-        private float _NormalizedStartTime = float.NaN;
+        [DefaultValue(0, float.NaN)]
+        private float _NormalizedStartTime;
 
         /// <inheritdoc/>
         public override float NormalizedStartTime
@@ -92,36 +91,10 @@ namespace Animancer
 
         /************************************************************************************************************************/
 
-        /// <summary>
-        /// The length of the <see cref="Clip"/> (in seconds), accounting for the <see cref="NormalizedStartTime"/> and
-        /// <see cref="AnimancerEvent.Sequence.NormalizedEndTime"/> (but not <see cref="Speed"/>).
-        /// </summary>
-        public virtual float Length
-        {
-            get
-            {
-                if (!IsValid)
-                    return 0;
-
-                var normalizedEndTime = Events.NormalizedEndTime;
-                normalizedEndTime = !float.IsNaN(normalizedEndTime)
-                    ? normalizedEndTime
-                    : AnimancerEvent.Sequence.GetDefaultNormalizedEndTime(_Speed);
-
-                var normalizedStartTime = !float.IsNaN(_NormalizedStartTime)
-                    ? _NormalizedStartTime
-                    : AnimancerEvent.Sequence.GetDefaultNormalizedStartTime(_Speed);
-
-                return _Clip.length * (normalizedEndTime - normalizedStartTime);
-            }
-        }
-
-        /************************************************************************************************************************/
-
         /// <inheritdoc/>
         public override bool IsValid => _Clip != null && !_Clip.legacy;
 
-        /// <summary>[<see cref="ITransitionDetailed"/>] Is the <see cref="Clip"/> looping?</summary>
+        /// <summary>[<see cref="ITransitionDetailed"/>] Returns <see cref="Motion.isLooping"/>.</summary>
         public override bool IsLooping => _Clip != null && _Clip.isLooping;
 
         /// <inheritdoc/>
@@ -136,16 +109,7 @@ namespace Animancer
         /************************************************************************************************************************/
 
         /// <inheritdoc/>
-        public override ClipState CreateState()
-        {
-#if UNITY_ASSERTIONS
-            if (_Clip == null)
-                throw new ArgumentException(
-                    $"Unable to create {nameof(ClipState)} because the {nameof(ClipTransition)}.{nameof(Clip)} is null.");
-#endif
-
-            return State = new ClipState(_Clip);
-        }
+        public override ClipState CreateState() => State = new ClipState(_Clip);
 
         /************************************************************************************************************************/
 
@@ -160,26 +124,6 @@ namespace Animancer
 
         /// <summary>[<see cref="IAnimationClipCollection"/>] Adds the <see cref="Clip"/> to the collection.</summary>
         public virtual void GatherAnimationClips(ICollection<AnimationClip> clips) => clips.Gather(_Clip);
-
-        /************************************************************************************************************************/
-
-        /// <inheritdoc/>
-        public virtual void CopyFrom(ClipTransition copyFrom)
-        {
-            CopyFrom((AnimancerTransition<ClipState>)copyFrom);
-
-            if (copyFrom == null)
-            {
-                _Clip = default;
-                _Speed = 1;
-                _NormalizedStartTime = float.NaN;
-                return;
-            }
-
-            _Clip = copyFrom._Clip;
-            _Speed = copyFrom._Speed;
-            _NormalizedStartTime = copyFrom._NormalizedStartTime;
-        }
 
         /************************************************************************************************************************/
 #if UNITY_EDITOR

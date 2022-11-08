@@ -16,11 +16,13 @@ namespace Game.SceneTransitions
 
         private BodyPart[] _parts;
 
+#if UNITY_EDITOR
         [Button]
         private void SetComponentsFromRoot()
         {
             _partsChangers = _changersRoot.GetComponentsInChildren<FightingPartsChanger>(_changersRoot);
         }
+#endif
 
         private void Start()
         {

@@ -1,4 +1,4 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
 
 using System;
 using System.Collections;
@@ -224,6 +224,10 @@ namespace Animancer
         /// Destroys the <see cref="Playable"/> if it was initialized and searches for an <see cref="Animator"/> on
         /// this object, or it's children or parents.
         /// </summary>
+        /// <remarks>
+        /// Called by the Unity Editor when this component is first added (in Edit Mode) and whenever the Reset command
+        /// is executed from its context menu.
+        /// </remarks>
         protected virtual void Reset()
         {
             OnDestroy();
@@ -234,6 +238,7 @@ namespace Animancer
         /************************************************************************************************************************/
 
         /// <summary>Ensures that the <see cref="PlayableGraph"/> is playing.</summary>
+        /// <remarks>Called by Unity when this component becomes enabled and active.</remarks>
         protected virtual void OnEnable()
         {
             if (IsPlayableInitialized)
@@ -241,6 +246,7 @@ namespace Animancer
         }
 
         /// <summary>Acts according to the <see cref="ActionOnDisable"/>.</summary>
+        /// <remarks>Called by Unity when this component becomes disabled or inactive.</remarks>
         protected virtual void OnDisable()
         {
             if (!IsPlayableInitialized)
@@ -377,6 +383,7 @@ namespace Animancer
         /************************************************************************************************************************/
 
         /// <summary>Ensures that the <see cref="Playable"/> is properly cleaned up.</summary>
+        /// <remarks>Called by Unity when this component is destroyed.</remarks>
         protected virtual void OnDestroy()
         {
             if (IsPlayableInitialized)
@@ -412,11 +419,11 @@ namespace Animancer
         #region Play Management
         /************************************************************************************************************************/
 
-        /// <summary>Returns the `clip` itself.</summary>
-        /// <remarks>
-        /// This method is used to determine the dictionary key to use for an animation when none is specified by the
-        /// caller, such as in <see cref="Play(AnimationClip)"/>.
-        /// </remarks>
+        /// <summary>
+        /// Returns the `clip` itself. This method is used to determine the dictionary key to use for an animation
+        /// when none is specified by the user, such as in <see cref="Play(AnimationClip)"/>. It can be overridden by
+        /// child classes to use something else as the key.
+        /// </summary>
         public virtual object GetKey(AnimationClip clip) => clip;
 
         /************************************************************************************************************************/

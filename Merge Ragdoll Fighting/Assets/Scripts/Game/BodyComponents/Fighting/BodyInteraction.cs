@@ -31,11 +31,13 @@ namespace Game.BodyComponents.Fighting
         [Space(5)]
         [SerializeField] private Transform _transform;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _transform = transform;
         }
+#endif
 
         private void Start()
         {

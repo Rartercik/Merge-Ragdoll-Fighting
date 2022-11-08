@@ -15,11 +15,13 @@ namespace Game.MenuComponents
         [Space(5)]
         [SerializeField] private TextMeshProUGUI _text;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _text = GetComponent<TextMeshProUGUI>();
         }
+#endif
 
         private void OnEnable()
         {

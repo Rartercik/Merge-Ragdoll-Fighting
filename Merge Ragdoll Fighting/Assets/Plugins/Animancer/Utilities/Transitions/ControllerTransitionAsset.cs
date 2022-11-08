@@ -1,4 +1,4 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
 
 using System;
 using System.Collections.Generic;
@@ -16,17 +16,14 @@ namespace Animancer
 {
     /// <inheritdoc/>
     /// https://kybernetik.com.au/animancer/api/Animancer/ControllerTransitionAsset
-#if !UNITY_EDITOR
-    [System.Obsolete(Validate.ProOnlyMessage)]
-#endif
     [CreateAssetMenu(menuName = Strings.MenuPrefix + "Controller Transition/Base", order = Strings.AssetMenuOrder + 5)]
     [HelpURL(Strings.DocsURLs.APIDocumentation + "/" + nameof(ControllerTransitionAsset))]
     public class ControllerTransitionAsset : AnimancerTransitionAsset<ControllerTransition>
     {
         /// <inheritdoc/>
         [Serializable]
-        public new class UnShared :
-            UnShared<ControllerTransitionAsset, ControllerTransition, ControllerState>,
+        public class UnShared :
+            AnimancerTransitionAsset.UnShared<ControllerTransitionAsset, ControllerTransition, ControllerState>,
             ControllerState.ITransition
         { }
     }
@@ -36,11 +33,7 @@ namespace Animancer
     /// <inheritdoc/>
     /// https://kybernetik.com.au/animancer/api/Animancer/ControllerTransition_1
     [Serializable]
-#if ! UNITY_EDITOR
-    [System.Obsolete(Validate.ProOnlyMessage)]
-#endif
-    public abstract class ControllerTransition<TState> : AnimancerTransition<TState>,
-        IAnimationClipCollection, ICopyable<ControllerTransition<TState>>
+    public abstract class ControllerTransition<TState> : AnimancerTransition<TState>, IAnimationClipCollection
         where TState : ControllerState
     {
         /************************************************************************************************************************/
@@ -64,23 +57,30 @@ namespace Animancer
         /************************************************************************************************************************/
 
         [SerializeField]
-        [Tooltip("Determines what each layer does when " +
-            nameof(ControllerState) + "." + nameof(ControllerState.Stop) + " is called." +
-            "\n• If empty, all layers will reset to their default state." +
-            "\n• If this array is smaller than the layer count, any additional layers will use the last value in this array.")]
-        private ControllerState.ActionOnStop[] _ActionsOnStop;
+        [Tooltip(Strings.Tooltips.NormalizedStartTime)]
+        [AnimationTime(AnimationTimeAttribute.Units.Normalized)]
+        [DefaultValue(0, float.NaN)]
+        private float _NormalizedStartTime;
+
+        /// <inheritdoc/>
+        public override float NormalizedStartTime
+        {
+            get => _NormalizedStartTime;
+            set => _NormalizedStartTime = value;
+        }
+
+        /************************************************************************************************************************/
+
+        [SerializeField, Tooltip("If false, stopping this state will reset all its layers to their default state")]
+        private bool _KeepStateOnStop;
 
         /// <summary>[<see cref="SerializeField"/>]
-        /// Determines what each layer does when <see cref="ControllerState.Stop"/> is called.
-        /// </summary>
-        /// <remarks>
-        /// If empty, all layers will reset to their <see cref="ControllerState.ActionOnStop.DefaultState"/>.
+        /// If false, <see cref="Stop"/> will reset all layers to their default state.
         /// <para></para>
-        /// If this array is smaller than the
-        /// <see cref="UnityEngine.Animations.AnimatorControllerPlayable.GetLayerCount"/>, any additional
-        /// layers will use the last value in this array.
-        /// </remarks>
-        public ref ControllerState.ActionOnStop[] ActionsOnStop => ref _ActionsOnStop;
+        /// If you set this value to false after the <see cref="Playable"/> is created, you must assign the
+        /// <see cref="DefaultStateHashes"/> or call <see cref="GatherDefaultStates"/> yourself.
+        /// </summary>
+        public ref bool KeepStateOnStop => ref _KeepStateOnStop;
 
         /************************************************************************************************************************/
 
@@ -109,12 +109,7 @@ namespace Animancer
         /************************************************************************************************************************/
 
         /// <inheritdoc/>
-        public override bool IsValid
-#if UNITY_EDITOR
-            => _Controller != null;
-#else
-            => false;
-#endif
+        public override bool IsValid => _Controller != null;
 
         /************************************************************************************************************************/
 
@@ -127,8 +122,28 @@ namespace Animancer
         /// <inheritdoc/>
         public override void Apply(AnimancerState state)
         {
-            if (state is ControllerState controllerState)
-                controllerState.ActionsOnStop = _ActionsOnStop;
+            var controllerState = State;
+            if (controllerState != null)
+            {
+                controllerState.KeepStateOnStop = _KeepStateOnStop;
+
+                if (!float.IsNaN(_NormalizedStartTime))
+                {
+                    if (!_KeepStateOnStop)
+                    {
+                        controllerState.Playable.Play(controllerState.DefaultStateHashes[0], 0, _NormalizedStartTime);
+                    }
+                    else
+                    {
+                        state.NormalizedTime = _NormalizedStartTime;
+                    }
+                }
+            }
+            else
+            {
+                if (!float.IsNaN(_NormalizedStartTime))
+                    state.NormalizedTime = _NormalizedStartTime;
+            }
 
             base.Apply(state);
         }
@@ -143,24 +158,6 @@ namespace Animancer
         }
 
         /************************************************************************************************************************/
-
-        /// <inheritdoc/>
-        public virtual void CopyFrom(ControllerTransition<TState> copyFrom)
-        {
-            CopyFrom((AnimancerTransition<TState>)copyFrom);
-
-            if (copyFrom == null)
-            {
-                _Controller = default;
-                _ActionsOnStop = Array.Empty<ControllerState.ActionOnStop>();
-                return;
-            }
-
-            _Controller = copyFrom._Controller;
-            _ActionsOnStop = copyFrom._ActionsOnStop;
-        }
-
-        /************************************************************************************************************************/
     }
 
     /************************************************************************************************************************/
@@ -168,26 +165,12 @@ namespace Animancer
     /// <inheritdoc/>
     /// https://kybernetik.com.au/animancer/api/Animancer/ControllerTransition
     [Serializable]
-#if ! UNITY_EDITOR
-    [System.Obsolete(Validate.ProOnlyMessage)]
-#endif
-    public class ControllerTransition : ControllerTransition<ControllerState>,
-        ControllerState.ITransition, ICopyable<ControllerTransition>
+    public class ControllerTransition : ControllerTransition<ControllerState>, ControllerState.ITransition
     {
         /************************************************************************************************************************/
 
         /// <inheritdoc/>
-        public override ControllerState CreateState()
-        {
-#if UNITY_ASSERTIONS
-            if (Controller == null)
-                throw new ArgumentException(
-                    $"Unable to create {nameof(ControllerState)} because the" +
-                    $" {nameof(ControllerTransition)}.{nameof(Controller)} is null.");
-#endif
-
-            return State = new ControllerState(Controller, ActionsOnStop);
-        }
+        public override ControllerState CreateState() => State = new ControllerState(Controller, KeepStateOnStop);
 
         /************************************************************************************************************************/
 
@@ -204,14 +187,6 @@ namespace Animancer
             => new ControllerTransition(controller);
 
         /************************************************************************************************************************/
-
-        /// <inheritdoc/>
-        public virtual void CopyFrom(ControllerTransition copyFrom)
-        {
-            CopyFrom((ControllerTransition<ControllerState>)copyFrom);
-        }
-
-        /************************************************************************************************************************/
         #region Drawer
 #if UNITY_EDITOR
         /************************************************************************************************************************/
@@ -224,12 +199,12 @@ namespace Animancer
             /************************************************************************************************************************/
 
             private readonly string[] Parameters;
-            private readonly string[] ParameterPropertySuffixes;
+            private readonly string[] ParameterPrefixes;
 
             /************************************************************************************************************************/
 
             /// <summary>Creates a new <see cref="Drawer"/> without any parameters.</summary>
-            public Drawer() : base(ControllerFieldName) { }
+            public Drawer() : this(null) { }
 
             /// <summary>Creates a new <see cref="Drawer"/> and sets the <see cref="Parameters"/>.</summary>
             public Drawer(params string[] parameters) : base(ControllerFieldName)
@@ -238,33 +213,31 @@ namespace Animancer
                 if (parameters == null)
                     return;
 
-                ParameterPropertySuffixes = new string[parameters.Length];
+                ParameterPrefixes = new string[parameters.Length];
 
-                for (int i = 0; i < ParameterPropertySuffixes.Length; i++)
+                for (int i = 0; i < ParameterPrefixes.Length; i++)
                 {
-                    ParameterPropertySuffixes[i] = "." + parameters[i];
+                    ParameterPrefixes[i] = "." + parameters[i];
                 }
             }
 
             /************************************************************************************************************************/
 
             /// <inheritdoc/>
-            protected override void DoChildPropertyGUI(
-                ref Rect area,
-                SerializedProperty rootProperty,
-                SerializedProperty property,
-                GUIContent label)
+            protected override void DoChildPropertyGUI(ref Rect area, SerializedProperty rootProperty,
+                SerializedProperty property, GUIContent label)
             {
                 var path = property.propertyPath;
 
-                if (ParameterPropertySuffixes != null)
+                if (ParameterPrefixes != null)
                 {
                     var controllerProperty = rootProperty.FindPropertyRelative(MainPropertyName);
-                    if (controllerProperty.objectReferenceValue is AnimatorController controller)
+                    var controller = controllerProperty.objectReferenceValue as AnimatorController;
+                    if (controller != null)
                     {
-                        for (int i = 0; i < ParameterPropertySuffixes.Length; i++)
+                        for (int i = 0; i < ParameterPrefixes.Length; i++)
                         {
-                            if (path.EndsWith(ParameterPropertySuffixes[i]))
+                            if (path.EndsWith(ParameterPrefixes[i]))
                             {
                                 area.height = Editor.AnimancerGUI.LineHeight;
                                 DoParameterGUI(area, controller, property);
@@ -283,14 +256,13 @@ namespace Animancer
                     Parameters != null &&
                     path.EndsWith(MainPropertyPathSuffix))
                 {
-                    if (property.objectReferenceValue is AnimatorController controller)
+                    var controller = property.objectReferenceValue as AnimatorController;
+                    if (controller != null)
                     {
                         for (int i = 0; i < Parameters.Length; i++)
                         {
                             property = rootProperty.FindPropertyRelative(Parameters[i]);
                             var parameterName = property.stringValue;
-
-                            // If a parameter is missing, assign it to the first float parameter.
                             if (!HasFloatParameter(controller, parameterName))
                             {
                                 parameterName = GetFirstFloatParameterName(controller);
@@ -304,7 +276,9 @@ namespace Animancer
 
             /************************************************************************************************************************/
 
-            /// <summary>Draws a dropdown menu to select the name of a parameter in the `controller`.</summary>
+            /// <summary>
+            /// Draws a dropdown menu to select the name of a parameter in the `controller`.
+            /// </summary>
             protected void DoParameterGUI(Rect area, AnimatorController controller, SerializedProperty property)
             {
                 var parameterName = property.stringValue;
@@ -369,8 +343,7 @@ namespace Animancer
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     var parameter = parameters[i];
-                    if (parameter.type == AnimatorControllerParameterType.Float &&
-                        parameter.name == name)
+                    if (parameter.type == AnimatorControllerParameterType.Float && name == parameters[i].name)
                     {
                         return true;
                     }

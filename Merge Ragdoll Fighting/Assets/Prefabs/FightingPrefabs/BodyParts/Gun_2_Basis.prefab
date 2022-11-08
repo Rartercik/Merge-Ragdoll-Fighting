@@ -244,8 +244,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _shot: {fileID: 8300000, guid: bb6f785ba0781fd4b9fc57ecc4c8c234, type: 3}
-  _minPitch: 1.5
-  _maxPitch: 2
+  _minPitch: 1
+  _maxPitch: 1.5
   _source: {fileID: 1486209481793276920}
 --- !u!1 &6311053961163379027
 GameObject:

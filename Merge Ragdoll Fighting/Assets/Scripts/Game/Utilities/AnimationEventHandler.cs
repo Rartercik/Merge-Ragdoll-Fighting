@@ -15,11 +15,13 @@ namespace Game.Utilities
         [Space(5)]
         [SerializeField] private Animator _animator;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _animator = GetComponent<Animator>();
         }
+#endif
 
         public void HitAnimationEvent()
         {

@@ -19,11 +19,13 @@ namespace Game.SceneTransitions
 
         private List<BodyPartType> _requiredTypes = Enum.GetValues(typeof(BodyPartType)).Cast<BodyPartType>().ToList();
 
+#if UNITY_EDITOR
         [Button]
         private void SetComponentsFromRoot()
         {
             _partsChangers = _changersRoot.GetComponentsInChildren<MenuPartsChanger>(_changersRoot);
         }
+#endif
 
         public void StartGame()
         {

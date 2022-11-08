@@ -23,11 +23,13 @@ namespace Game.MenuComponents
 
         private bool _bought;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _text = GetComponent<TextMeshProUGUI>();
         }
+#endif
 
         private void Start()
         {

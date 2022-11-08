@@ -17,11 +17,13 @@ namespace Game.Environment
         private Vector3 _startPosition;
         private Vector3 _startPositionOfTarget;
 
+#if UNITY_EDITOR
         [Button]
         private void SetRequiredComponents()
         {
             _transform = transform;
         }
+#endif
 
         private void Start()
         {
